@@ -15,8 +15,8 @@ class EngineTests(unittest.TestCase):
         frame = np.full((12, 16, 3), 123, dtype=np.uint8)
         source.submit(frame)
 
-        with patch.object(Engine, '_open_capture', side_effect=AssertionError('camera must not open')), \\
-             patch.object(Engine, '_open_virtual', side_effect=AssertionError('virtual output must not open')), \\
+        with patch.object(Engine, '_open_capture', side_effect=AssertionError('camera must not open')), \
+             patch.object(Engine, '_open_virtual', side_effect=AssertionError('virtual output must not open')), \
              patch.object(Engine, '_inference', return_value=None):
             engine = Engine(Settings(effect='instant', dynamic_background=False), frame_input=source)
             deadline = monotonic() + 3
