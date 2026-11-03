@@ -13,6 +13,7 @@ from .virtual_output import VirtualOutput
 from .gesture import HoldGate
 from .gesture_guides import guide_for
 from .scene import Frame, Scene
+from .frame_input import LatestFrameInput
 from .vision import Detector, Segmenter
 from .effects import Silhouette, TeleportEffect
 from .effect_catalog import EFFECTS
@@ -34,8 +35,11 @@ class Settings:
     virtual_device: str | None = None
 
 class Engine:
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, frame_input: LatestFrameInput | None = None) -> None:
         self.settings = settings
+        self.frame_input = frame_input
+        if frame_input is not None:
+            self.virtual_status = 'Entrada OBS conectada · sem abrir outra webcam'
         self.dynamic_background = settings.dynamic_background
         self.effect_mode = settings.effect
         self.preview_revision = 0
@@ -207,14 +211,20 @@ class Engine:
         measured=monotonic()
         count=0
         try:
-            capture=self._open_capture()
+            if self.frame_input is None:
+                capture=self._open_capture()
             inference=Thread(target=self._inference,daemon=True,name='recognition')
             inference.start()
             self.phase='uncalibrated'
             self._set_message('Webcam aberta. Capture e confirme o fundo vazio.')
             while not self.stop.is_set():
                 tick=monotonic()
-                ok,frame=capture.read()
+                if self.frame_input is not None:
+                    ok,frame=self.frame_input.read(timeout=0.25)
+                elif capture is not None:
+                    ok,frame=capture.read()
+                else:
+                    ok,frame=False,None
                 if not ok or frame is None:
                     failed_reads+=1
                     gate.reset()
@@ -234,9 +244,10 @@ class Engine:
                     silhouette=self.silhouette
                 height,width=frame.shape[:2]
                 if not virtual_attempted:
-                    virtual=self._open_virtual(width,height)
+                    if self.frame_input is None:
+                        virtual=self._open_virtual(width,height)
+                        self.virtual_active=virtual is not None
                     virtual_attempted=True
-                    self.virtual_active=virtual is not None
                 while True:
                     try: command=self.commands.get_nowait()
                     except Empty: break
