@@ -38,8 +38,6 @@ class Engine:
     def __init__(self, settings: Settings, frame_input: LatestFrameInput | None = None) -> None:
         self.settings = settings
         self.frame_input = frame_input
-        if frame_input is not None:
-            self.virtual_status = 'Entrada OBS conectada · sem abrir outra webcam'
         self.dynamic_background = settings.dynamic_background
         self.effect_mode = settings.effect
         self.preview_revision = 0
@@ -57,10 +55,11 @@ class Engine:
         self.virtual_active = False
         self.background_status = ''
         self.preview: Frame | None = None
-        self.message = 'Abrindo webcam…'
+        self.message = 'Aguardando vídeo do OBS…' if frame_input is not None else 'Abrindo webcam…'
         self.phase = 'opening'
         self.hidden = False
-        self.virtual_status = 'Saída virtual desligada'
+        self.virtual_status = ('Entrada OBS conectada · sem abrir outra webcam' if frame_input is not None
+                               else 'Saída virtual desligada')
         self.gesture_error = ''
         self.effect_error = ''
         self.vision_hint = 'Preparando reconhecimento…'
@@ -216,7 +215,8 @@ class Engine:
             inference=Thread(target=self._inference,daemon=True,name='recognition')
             inference.start()
             self.phase='uncalibrated'
-            self._set_message('Webcam aberta. Capture e confirme o fundo vazio.')
+            self._set_message('Aguardando quadros do OBS…' if self.frame_input is not None
+                              else 'Webcam aberta. Capture e confirme o fundo vazio.')
             while not self.stop.is_set():
                 tick=monotonic()
                 if self.frame_input is not None:
@@ -226,9 +226,12 @@ class Engine:
                 else:
                     ok,frame=False,None
                 if not ok or frame is None:
-                    failed_reads+=1
                     gate.reset()
                     self.progress=0
+                    if self.frame_input is not None:
+                        self.stop.wait(0.01)
+                        continue
+                    failed_reads+=1
                     self._set_message('Falha de leitura. Tentando recuperar a webcam…')
                     if failed_reads>=15:
                         raise RuntimeError('Webcam desconectada. Pare e inicie novamente para reconectar.')
