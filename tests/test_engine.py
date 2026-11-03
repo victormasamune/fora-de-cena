@@ -3,12 +3,40 @@ from threading import Event
 from unittest.mock import Mock, patch
 import numpy as np
 from teleport_cam.engine import Engine, Settings
+from teleport_cam.frame_input import LatestFrameInput
 from teleport_cam.scene import Scene
 from teleport_cam.effects import Silhouette
 from time import monotonic
 import cv2
 
 class EngineTests(unittest.TestCase):
+    def test_external_frame_input_does_not_open_camera_or_virtual_output(self):
+        source = LatestFrameInput()
+        frame = np.full((12, 16, 3), 123, dtype=np.uint8)
+        source.submit(frame)
+
+        with patch.object(Engine, '_open_capture', side_effect=AssertionError('camera must not open')), \\
+             patch.object(Engine, '_open_virtual', side_effect=AssertionError('virtual output must not open')), \\
+             patch.object(Engine, '_inference', return_value=None):
+            engine = Engine(Settings(effect='instant', dynamic_background=False), frame_input=source)
+            deadline = monotonic() + 3
+            try:
+                while monotonic() < deadline:
+                    with engine.lock:
+                        ready = engine.preview is not None
+                    if ready:
+                        break
+                    Event().wait(0.01)
+                with engine.lock:
+                    self.assertIsNotNone(engine.preview)
+                    np.testing.assert_array_equal(engine.preview, frame)
+            finally:
+                engine.stop.set()
+                engine.thread.join(3)
+
+        self.assertFalse(engine.thread.is_alive())
+        self.assertFalse(engine.virtual_active)
+
     def test_meet_completion_waits_for_output_confirmation_and_uses_delivery_time(self):
         ready, sending, accepted = Event(), Event(), Event()
         capture, virtual = Mock(), Mock()
