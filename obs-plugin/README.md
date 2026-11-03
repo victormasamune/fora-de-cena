@@ -6,17 +6,21 @@ e não abre uma segunda captura da câmera.
 
 ## Alvo de compatibilidade
 
-- OBS Studio 33.x, Windows x64.
+- Windows 11 x64.
+- OBS Studio 33.0.1 / série 33.x.
 - API nativa libobs e módulos C++.
-- Toolchain inicial: Visual Studio 2022 (17.x) e CMake 3.28 ou superior.
-- A versão exata do SDK/libobs usada na compilação deve corresponder ao pacote
-  de desenvolvimento selecionado para a instalação do OBS.
+- Toolchain alinhado ao OBS 33: Visual Studio 2026 e Windows SDK 10.0.26100.
+- CMake: usar a versão suportada pelo template oficial e pela toolchain instalada
+  (a referência atual do template recomenda CMake 3.30.5).
 
-A documentação oficial 33.0.1 descreve filtros como objetos de source do libobs,
+**Importante:** o template oficial `obsproject/obs-plugintemplate` ainda publica
+um `buildspec.json` com OBS 31.1.1. Não devemos copiar essa configuração sem
+atualizar e validar as dependências para OBS 33.0.1. A versão exata de libobs e
+dos pré-requisitos precisa corresponder ao alvo do plugin.
+
+A documentação do OBS descreve filtros como objetos de source do libobs,
 registrados por `obs_register_source`, e o pipeline de renderização de filtros
 por `obs_source_process_filter_begin` / `obs_source_process_filter_end`.
-O projeto deve acompanhar o modelo de build do template oficial
-`obsproject/obs-plugintemplate`, que prepara as dependências libobs no CMake.
 
 ## Estado atual
 
@@ -42,18 +46,20 @@ timeout; em falha, o filtro preserva o quadro original sem bloquear o render.
 
 ## Próximas etapas
 
-1. Alinhar o CMake ao template oficial do OBS e fixar a dependência libobs.
-2. Compilar e carregar o filtro em OBS Studio 33.x x64.
-3. Criar transporte de quadros com fila limitada e fallback para imagem original.
-4. Refatorar o motor Python para aceitar quadros externos, sem abrir câmera.
-5. Conectar segmentação, calibração, gestos e os efeitos existentes.
-6. Empacotar o plugin e testar latência, FPS, encerramento e reconexão.
+1. Fixar e validar as dependências libobs/obs-deps compatíveis com OBS 33.0.1.
+2. Integrar o CMake ao fluxo de build oficial sem reutilizar pins obsoletos do OBS 31.
+3. Compilar e carregar o filtro em OBS Studio 33.x x64.
+4. Criar transporte de quadros com fila limitada e fallback para imagem original.
+5. Refatorar o motor Python para aceitar quadros externos, sem abrir câmera.
+6. Conectar segmentação, calibração, gestos e os efeitos existentes.
+7. Empacotar o plugin e testar latência, FPS, encerramento e reconexão.
 
 ## Referências oficiais
 
 - https://docs.obsproject.com/plugins
 - https://docs.obsproject.com/graphics
 - https://github.com/obsproject/obs-plugintemplate
+- https://github.com/obsproject/obs-studio/releases/tag/33.0.1
 
 ## Licenças
 
