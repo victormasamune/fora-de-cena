@@ -5,19 +5,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Keep the user's OBS source/dependency finder setup for the Windows SDK.
-if(WIN32 AND NOT DEFINED OBS_DEPS_ROOT)
-    message(FATAL_ERROR "Defina OBS_DEPS_ROOT apontando para a pasta .deps.")
-endif()
-if(DEFINED OBS_SOURCE_ROOT)
+# Optional hints from an existing build. The libobs SDK owns discovery of its
+# public dependencies (SIMDe, Threads and w32-pthreads on MSVC).
+if(DEFINED OBS_SOURCE_ROOT AND EXISTS "${OBS_SOURCE_ROOT}/cmake/finders")
     list(PREPEND CMAKE_MODULE_PATH "${OBS_SOURCE_ROOT}/cmake/finders")
 endif()
-if(DEFINED OBS_DEPS_ROOT)
+if(DEFINED OBS_DEPS_ROOT AND EXISTS "${OBS_DEPS_ROOT}/cmake/finders")
     list(PREPEND CMAKE_MODULE_PATH "${OBS_DEPS_ROOT}/cmake/finders")
 endif()
-if(WIN32)
-    find_package(FFmpeg REQUIRED COMPONENTS avcodec avformat avutil swscale swresample)
-endif()
+# The IPC filter does not call FFmpeg. Those libraries are private dependencies
+# of libobs, not prerequisites that this plugin should discover independently.
 find_package(libobs CONFIG REQUIRED)
 find_package(Threads REQUIRED)
 

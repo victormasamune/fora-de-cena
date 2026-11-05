@@ -32,7 +32,8 @@ por `obs_source_process_filter_begin` / `obs_source_process_filter_end`.
 - envia quadros em thread separada e recebe os mesmos pixels de volta;
 - mantém somente o quadro pendente mais recente e descarta respostas vencidas;
 - preserva o vídeo original em falha, formato não suportado ou worker desligado;
-- preserva os finders de OBS/FFmpeg usados na configuração Windows do usuário.
+- reaproveita o SDK libobs e os caminhos do cache da configuração Windows;
+- deixa o SDK carregar suas dependências, sem exigir FFmpeg diretamente no plugin.
 
 O motor Python já aceita `LatestFrameInput` sem abrir outra webcam ou câmera
 virtual. Este marco testa apenas o transporte de quadros nativos: o worker IPC

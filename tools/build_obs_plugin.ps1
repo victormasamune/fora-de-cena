@@ -40,6 +40,8 @@ if (-not $homeDirectory -or
 }
 # Reconfigure with the existing cache, preserving OBS_SOURCE_ROOT, OBS_DEPS_ROOT,
 # generator, architecture, libobs_DIR and CMAKE_PREFIX_PATH from the user's setup.
+Write-Host "Reutilizando build: $BuildDir"
+Write-Host "O plugin usa o SDK libobs; nao exige uma busca separada por FFmpeg."
 & cmake -S $sourceRoot -B $BuildDir
 if ($LASTEXITCODE -ne 0) { throw "Falha ao reconfigurar o plugin. Nenhuma DLL foi instalada." }
 & cmake --build $BuildDir --config RelWithDebInfo

@@ -15,7 +15,8 @@ git pull --ff-only origin feature/obs-webcam-filter
 ```
 
 O stash guarda suas alterações. Elas foram incorporadas à nova versão: finders
-OBS/FFmpeg, libobs CONFIG e uso do efeito padrão do OBS. Não é preciso reaplicar
+OBS, libobs CONFIG e uso do efeito padrão do OBS. A busca direta de FFmpeg foi
+removida: o plugin não usa essa API; o SDK libobs resolve suas próprias dependências. Não é preciso reaplicar
 o stash por cima dos novos arquivos. Se o pull falhar, envie o erro; não descarte
 outras alterações. Se esses arquivos já estiverem limpos, o stash apenas informa
 que não há alterações locais para guardar.
@@ -40,6 +41,22 @@ O caminho acima é um exemplo: use o seu caminho real. O script não instala nad
 Ao terminar, ele mostra o caminho completo da DLL produzida. Feche o OBS,
 guarde uma cópia da DLL antiga e substitua somente `fora-de-cena-obs.dll` na
 pasta em que instalou o protótipo. Abra o OBS novamente.
+
+### Se aparecer `FindFFmpeg.cmake` não encontrado
+
+Uma versão anterior exigia FFmpeg diretamente no CMake do plugin, antes de
+carregar o SDK libobs. Essa exigência foi removida. Na raiz do repositório,
+atualize a branch e repita a compilação:
+
+```powershell
+git pull --ff-only origin feature/obs-webcam-filter
+powershell -NoProfile -File .\tools\build_obs_plugin.ps1
+```
+
+Não é preciso apagar o cache, reinstalar o Python ou baixar outro FFmpeg para
+corrigir essa busca. `libobs_DIR`, `CMAKE_PREFIX_PATH`, o gerador e o SDK Windows
+continuam vindo do seu cache. Se surgir outro erro, envie a saída completa e o
+caminho de build mostrado pelo script para identificar a dependência real do SDK.
 
 ## Iniciar o worker e configurar o filtro
 
