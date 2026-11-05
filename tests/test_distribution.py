@@ -26,6 +26,8 @@ class SourceReleaseTests(unittest.TestCase):
         self.assertIn('teleport_cam/model_assets.py',names)
         self.assertIn('meet_extension/manifest.json',names)
         self.assertIn('requirements.lock.txt',names)
+        self.assertIn('obs-plugin/cmake/FindSIMDe.cmake',names)
+        self.assertIn('obs-plugin/cmake/ObsSdkHints.cmake',names)
         for name in names:
             self.assertNotIn(name,{'user_settings.json','.meet_pairing_key','PROMPTS_GESTOS.md','AUDITORIA.md','DESIGN.md','PRODUCT.md','PUBLICAR.md'})
             self.assertFalse(any(part in Path(name).parts for part in ('work','.venv','dist','models','.git','.impeccable')))

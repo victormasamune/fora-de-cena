@@ -58,6 +58,18 @@ corrigir essa busca. `libobs_DIR`, `CMAKE_PREFIX_PATH`, o gerador e o SDK Window
 continuam vindo do seu cache. Se surgir outro erro, envie a saída completa e o
 caminho de build mostrado pelo script para identificar a dependência real do SDK.
 
+### Se aparecer `FindSIMDe.cmake` não encontrado
+
+O SDK libobs requer os cabeçalhos SIMD Everywhere. Alguns SDKs temporários
+exportam `libobsConfig.cmake` para `.deps/cmake` sem incluir os módulos de busca.
+O projeto agora inclui um módulo de busca próprio e reutiliza os caminhos do
+cache, inclusive pacotes `obs-deps-*` vizinhos a esse arquivo.
+
+Atualize e repita o mesmo comando de compilação. Nenhuma etapa de Python precisa
+ser repetida. Se o novo erro disser que `simde/simde-common.h` não existe, envie
+a saída: isso distingue falta do módulo de busca de falta dos cabeçalhos reais.
+O build continua exigindo os arquivos do SDK; não cria uma dependência fictícia.
+
 ## Iniciar o worker e configurar o filtro
 
 Na raiz do projeto:

@@ -5,14 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Optional hints from an existing build. The libobs SDK owns discovery of its
-# public dependencies (SIMDe, Threads and w32-pthreads on MSVC).
-if(DEFINED OBS_SOURCE_ROOT AND EXISTS "${OBS_SOURCE_ROOT}/cmake/finders")
-    list(PREPEND CMAKE_MODULE_PATH "${OBS_SOURCE_ROOT}/cmake/finders")
-endif()
-if(DEFINED OBS_DEPS_ROOT AND EXISTS "${OBS_DEPS_ROOT}/cmake/finders")
-    list(PREPEND CMAKE_MODULE_PATH "${OBS_DEPS_ROOT}/cmake/finders")
-endif()
+include(cmake/ObsSdkHints.cmake)
 # The IPC filter does not call FFmpeg. Those libraries are private dependencies
 # of libobs, not prerequisites that this plugin should discover independently.
 find_package(libobs CONFIG REQUIRED)

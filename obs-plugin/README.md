@@ -33,7 +33,8 @@ por `obs_source_process_filter_begin` / `obs_source_process_filter_end`.
 - mantém somente o quadro pendente mais recente e descarta respostas vencidas;
 - preserva o vídeo original em falha, formato não suportado ou worker desligado;
 - reaproveita o SDK libobs e os caminhos do cache da configuração Windows;
-- deixa o SDK carregar suas dependências, sem exigir FFmpeg diretamente no plugin.
+- deixa o SDK carregar suas dependências, sem exigir FFmpeg diretamente no plugin;
+- inclui busca de cabeçalhos SIMDe para SDKs temporários sem seus módulos CMake.
 
 O motor Python já aceita `LatestFrameInput` sem abrir outra webcam ou câmera
 virtual. Este marco testa apenas o transporte de quadros nativos: o worker IPC

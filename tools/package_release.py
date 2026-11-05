@@ -27,6 +27,7 @@ FILES = (
 FOLDERS = {
     'teleport_cam': {'.py'}, 'camera_output': {'.py', '.md', '.spec', '.txt'},
     'tests': {'.py', '.mjs'}, 'meet_extension': {'.js', '.json', '.html', '.css'},
+    'obs-plugin/cmake': {'.cmake'},
     'obs-plugin/src': {'.cpp', '.hpp'}, 'obs-plugin/tests': {'.cpp'},
     'tools': {'.py', '.ps1'}, 'packaging': {'.spec', '.iss', '.txt', '.md'},
 }
