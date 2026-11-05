@@ -24,40 +24,46 @@ por `obs_source_process_filter_begin` / `obs_source_process_filter_end`.
 
 ## Estado atual
 
-**Protótipo de integração OBS (0.1.0):**
-- registra o filtro de vídeo "Fora de Cena";
-- oferece opção para ativar/desativar;
-- mantém o vídeo original intacto enquanto o processamento é integrado.
+**Protótipo 0.2.0, transporte experimental sem efeitos:**
 
-O motor Python já aceita `LatestFrameInput`, uma entrada BGR com apenas o quadro
-mais recente. Nesse modo, não abre `cv2.VideoCapture` nem a câmera virtual.
-A entrada externa e o motor têm testes automatizados em `tests/`. Isso ainda
-não conecta a DLL ao Python: o transporte IPC e o retorno do vídeo estão pendentes.
+- preserva o filtro original **Fora de Cena** e usa o efeito padrão do OBS;
+- adiciona **Fora de Cena IPC (experimental)** para fontes assíncronas de webcam;
+- oferece worker Python local iniciado manualmente, com autenticação por sessão;
+- envia quadros em thread separada e recebe os mesmos pixels de volta;
+- mantém somente o quadro pendente mais recente e descarta respostas vencidas;
+- preserva o vídeo original em falha, formato não suportado ou worker desligado;
+- preserva os finders de OBS/FFmpeg usados na configuração Windows do usuário.
 
-Gestos, segmentação, calibração e efeitos ainda não estão conectados. Esta não é
-uma versão funcional dos efeitos no OBS, e a compilação ainda não foi validada.
+O motor Python já aceita `LatestFrameInput` sem abrir outra webcam ou câmera
+virtual. Este marco testa apenas o transporte de quadros nativos: o worker IPC
+ainda não chama o motor, os gestos ou os efeitos.
 
-## Arquitetura planejada
+**Teste guiado e atualização da DLL:** [TESTE_IPC.md](TESTE_IPC.md).
 
-```text
-Webcam física → Fonte OBS → Filtro nativo → IPC local → Worker de visão
-     ↑                                                   ↓
-     └──────── Cena / gravação / transmissão ← quadro processado
-```
+## Arquitetura
 
-A câmera permanece aberta exclusivamente pelo OBS. O worker não pode usar
-`cv2.VideoCapture`. A comunicação terá fila limitada, sequência de quadros e
-timeout; em falha, o filtro preserva o quadro original sem bloquear o render.
+A fonte OBS fornece os pixels ao callback assíncrono; o plugin copia somente as
+linhas úteis, excluindo padding. Um worker C++ envia o pacote binário autenticado
+via TCP em `127.0.0.1`. O Python valida dimensões, formato, sequência e tamanho,
+e devolve os mesmos bytes. O próximo callback do OBS aplica o resultado recente
+compatível com o formato e as dimensões atuais. Nenhum socket é lido ou escrito
+no callback da captura. O worker não grava vídeo nem inicia capturas adicionais.
 
-## Próximas etapas
+São aceitos formatos de 8 bits BGRA/BGRX/RGBA, NV12/I420 e YUY2/UYVY/YVYU até
+3840×2160. O filtro original síncrono continua compatível com cenas já salvas.
+O novo filtro IPC é específico para fontes assíncronas, como a webcam do OBS.
 
-1. Fixar e validar as dependências libobs/obs-deps compatíveis com OBS 33.0.1.
-2. Integrar o CMake ao fluxo de build oficial sem reutilizar pins obsoletos do OBS 31.
-3. Compilar e carregar o filtro em OBS Studio 33.x x64.
-4. Criar transporte de quadros com fila limitada e fallback para imagem original.
-5. Integrar a entrada externa já disponível no motor ao transporte IPC.
-6. Conectar segmentação, calibração, gestos e os efeitos existentes.
-7. Empacotar o plugin e testar latência, FPS, encerramento e reconexão.
+## Validação e próximos marcos
+
+O núcleo C++ do transporte foi compilado com GCC e testado contra o Python em
+loopback, incluindo retorno exato nos oito formatos, padding, chave inválida,
+resposta inconsistente, timeout e encerramento. A suíte não usa câmera nem libobs.
+A compilação da DLL MSVC e o carregamento no OBS 33 ainda precisam ser validados
+no Windows. Não há certificado de latência, qualidade ou desempenho em live.
+
+Depois do teste de ida e volta no OBS: adaptar os quadros para a entrada BGR do
+motor, conectar saída processada, calibração/confirmação do fundo, restauração,
+gestos e efeitos. A GUI do aplicativo desktop continua independente.
 
 ## Referências oficiais
 

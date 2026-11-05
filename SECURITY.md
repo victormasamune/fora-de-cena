@@ -6,8 +6,9 @@ teste com câmera, driver e navegador reais.
 
 ## Fronteiras que devem permanecer
 
-- Frames ficam no app, no processo independente de saída e na câmera virtual
-  escolhida; comunicação por pipes anônimos locais, sem serviço de rede adicional.
+- No aplicativo desktop, frames ficam no app, no processo independente de saída
+  e na câmera virtual escolhida; comunicação por pipes anônimos locais. Esse
+  fluxo não inicia o worker experimental do OBS.
 - A saída é iniciada por caminho fixo do pacote, sem shell, comandos externos ou
   código recebido pela rede. Os canais têm formato/tamanho definidos, um quadro
   em trânsito e prazo de resposta. Um travamento encerra o filho e mantém prévia.
@@ -36,6 +37,28 @@ O segredo não protege contra malware ou outro processo com acesso à mesma
 conta do Windows. F8 pode estar ocupado por outro aplicativo; a interface
 informa o fallback e mantém o botão Restaurar. Após a extensão receber um
 pedido de saída, cancelar pode ser tarde demais; o aplicativo não reabre abas.
+
+## Transporte experimental do OBS
+
+O worker `python -m teleport_cam.obs_worker` é iniciado manualmente e recebe
+quadros somente após o usuário ativar o filtro IPC. Ele escuta exclusivamente em
+`127.0.0.1`, numa porta local (aleatória por padrão), e exige uma chave aleatória
+nova a cada inicialização antes de ler imagens. Não inicia câmera, motor de visão,
+saída virtual, interface, servidor HTTP ou comandos recebidos. O protocolo binário
+não usa pickle, eval, caminhos de arquivo nem execução de comandos.
+
+São aceitos no máximo quatro clientes simultâneos, com limites de dimensões,
+comprimento e prazo total de mensagem. O plugin mantém somente um quadro pendente,
+um em trânsito e o resultado mais recente; imagens vencidas ou respostas com
+metadados divergentes são descartadas. Não há espera de socket no callback do OBS.
+O modo inicial devolve as mesmas imagens, sem efeitos. A captura original continua
+quando o worker fica indisponível. Não se deve expor esse serviço fora do loopback.
+
+A chave fica nas propriedades do filtro e pode acompanhar uma coleção de cenas
+exportada; ela expira quando o worker é encerrado. Não inclua a chave atual em
+relatórios públicos. O worker não grava quadros e sua saída de diagnóstico contém
+somente dimensões, porta e chave de sessão. Não há isolamento contra processos
+maliciosos executados sob a mesma conta do usuário.
 
 ## Relatar um problema
 

@@ -20,12 +20,15 @@ FILES = (
     'requirements-opencv-build.txt', 'requirements-numpy-build.txt', 'packaging/opencv-minimal-profile.json',
     'packaging/opencv-minimal-source.patch',
     'packaging/mediapipe-intel-profile.json', 'packaging/mediapipe-intel-source.patch', 'MAC_INTEL.md', 'MULTIPLATAFORMA.md',
-    'INICIAR.bat', 'INSTALAR.bat', 'camera_output/LICENSE',
+    'INICIAR.bat', 'INSTALAR.bat', 'INICIAR_WORKER_OBS.bat', 'camera_output/LICENSE',
+    'obs-plugin/CMakeLists.txt', 'obs-plugin/README.md', 'obs-plugin/PLUGIN_STATUS.md',
+    'obs-plugin/TESTE_IPC.md',
 )
 FOLDERS = {
     'teleport_cam': {'.py'}, 'camera_output': {'.py', '.md', '.spec', '.txt'},
     'tests': {'.py', '.mjs'}, 'meet_extension': {'.js', '.json', '.html', '.css'},
-    'tools': {'.py'}, 'packaging': {'.spec', '.iss', '.txt', '.md'},
+    'obs-plugin/src': {'.cpp', '.hpp'}, 'obs-plugin/tests': {'.cpp'},
+    'tools': {'.py', '.ps1'}, 'packaging': {'.spec', '.iss', '.txt', '.md'},
 }
 ASSETS = (
     'assets/README.md', 'assets/gestures/README.md',
