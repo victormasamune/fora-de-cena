@@ -1,0 +1,3 @@
+# Dependências do aplicativo e executor de testes; sem ferramentas de empacotamento.
+-r requirements.txt
+pytest>=9,<10

@@ -18,7 +18,14 @@ from .model_assets import MODEL_ASSETS
 def model_options(folder: Path, name: str) -> python.BaseOptions:
     # The native Windows file loader fails on accented paths. Python reads Unicode
     # paths correctly; pass the exact verified bytes rather than reopening by path.
-    model = (folder / name).read_bytes()
+    path = folder / name
+    try:
+        model = path.read_bytes()
+    except FileNotFoundError as error:
+        raise FileNotFoundError(
+            f'Modelo ausente: {path}. Execute python setup_models.py na raiz do repositório '
+            'com o mesmo Python do aplicativo, ou execute INSTALAR.bat.'
+        ) from error
     if hashlib.sha256(model).hexdigest() != MODEL_ASSETS[name][1]:
         raise ValueError(f'Modelo alterado: {name}. Reinstale o app ou repare os modelos nos fontes.')
     return python.BaseOptions(model_asset_buffer=model)

@@ -25,3 +25,8 @@ class ModelInstallationTests(unittest.TestCase):
                 setup_models.prepare(path)
                 download.assert_not_called()
             self.assertTrue((path/'checksums.json').exists())
+
+    def test_missing_model_explains_how_to_install(self):
+        with TemporaryDirectory() as folder:
+            with self.assertRaisesRegex(FileNotFoundError, 'python setup_models.py'):
+                setup_models.verify_model(Path(folder) / 'missing.task', 'unused')

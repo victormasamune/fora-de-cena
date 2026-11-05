@@ -29,6 +29,11 @@ por `obs_source_process_filter_begin` / `obs_source_process_filter_end`.
 - oferece opção para ativar/desativar;
 - mantém o vídeo original intacto enquanto o processamento é integrado.
 
+O motor Python já aceita `LatestFrameInput`, uma entrada BGR com apenas o quadro
+mais recente. Nesse modo, não abre `cv2.VideoCapture` nem a câmera virtual.
+A entrada externa e o motor têm testes automatizados em `tests/`. Isso ainda
+não conecta a DLL ao Python: o transporte IPC e o retorno do vídeo estão pendentes.
+
 Gestos, segmentação, calibração e efeitos ainda não estão conectados. Esta não é
 uma versão funcional dos efeitos no OBS, e a compilação ainda não foi validada.
 
@@ -50,7 +55,7 @@ timeout; em falha, o filtro preserva o quadro original sem bloquear o render.
 2. Integrar o CMake ao fluxo de build oficial sem reutilizar pins obsoletos do OBS 31.
 3. Compilar e carregar o filtro em OBS Studio 33.x x64.
 4. Criar transporte de quadros com fila limitada e fallback para imagem original.
-5. Refatorar o motor Python para aceitar quadros externos, sem abrir câmera.
+5. Integrar a entrada externa já disponível no motor ao transporte IPC.
 6. Conectar segmentação, calibração, gestos e os efeitos existentes.
 7. Empacotar o plugin e testar latência, FPS, encerramento e reconexão.
 

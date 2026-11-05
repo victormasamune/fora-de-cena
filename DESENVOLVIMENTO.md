@@ -29,8 +29,9 @@ modelos, o reconhecimento e os efeitos funcionam localmente.
 
 Como alternativa aos comandos de ambiente, `INSTALAR.bat` usa o comando `python`
 e exige que ele aponte para Python 3.14 x64. Depois execute `INICIAR.bat`.
-Para gerar pacotes ou executar a suíte completa de testes, instale também
-`requirements-build.txt` conforme mostrado acima.
+Para gerar pacotes, instale também `requirements-build.txt` conforme mostrado
+acima. Para os testes Python, instale `requirements-test.txt`; não é necessário
+instalar as ferramentas de empacotamento.
 
 Para enviar o resultado a uma chamada, instale o OBS Studio separadamente e
 selecione OBS Virtual Camera no serviço de vídeo. A opção Só prévia funciona sem
@@ -64,7 +65,18 @@ Consulte [SECURITY.md](SECURITY.md) antes de alterar esse protocolo.
 
 ## Testes automatizados
 
-Na raiz do repositório, depois de instalar as dependências:
+Na raiz do repositório, use o mesmo Python para instalar e executar os testes.
+No Windows, para preparar um ambiente isolado:
+
+```powershell
+py -3.14 -m venv .venv
+.venv\Scripts\python.exe -m pip install -r requirements-test.txt
+.venv\Scripts\python.exe -m pytest -v
+```
+
+O Pytest coleta somente `test_*.py` em `tests/`. Importar `smoke_test.py`
+não abre a interface nem inicializa modelos. A suíte também pode ser executada
+com o executor padrão do Python:
 
 ```powershell
 .venv\Scripts\python.exe -B -m unittest discover -s tests -v
@@ -85,7 +97,21 @@ verifica o protocolo do processo de saída sem abrir janela, webcam ou câmera v
 
 O comando não testa o driver real. `smoke_test.py` é outro teste opcional: ele
 inicializa a interface, enumera câmeras e pode registrar F8. Não o execute quando
-precisar evitar interferência com outros programas.
+precisar evitar interferência com outros programas. Para executá-lo manualmente,
+prepare primeiro os modelos com o procedimento oficial:
+
+```powershell
+.venv\Scripts\python.exe setup_models.py
+.venv\Scripts\python.exe smoke_test.py
+```
+
+A pasta `models/` não acompanha o Git. `setup_models.py` baixa os três arquivos
+listados em `teleport_cam/model_assets.py`, verifica o SHA-256 de cada arquivo
+e só então conclui a instalação. Não é necessário baixar modelos para executar
+`pytest`. Prefira o ambiente `.venv`: o processo de saída usa `python -I`,
+que ignora pacotes instalados somente no diretório do usuário (`pip install --user`).
+Instalar com `.venv\Scripts\python.exe -m pip` deixa as dependências acessíveis
+também a esse processo isolado. Não é necessário ativar o ambiente nem alterar o PATH.
 
 Para medir somente o compositor com dados sintéticos:
 

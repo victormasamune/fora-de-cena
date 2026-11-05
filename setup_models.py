@@ -8,7 +8,14 @@ from teleport_cam.model_assets import MODEL_ASSETS
 MAX_MODEL_BYTES = 32 * 1024 * 1024
 
 def verify_model(path: Path, expected: str) -> None:
-    if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+    try:
+        model = path.read_bytes()
+    except FileNotFoundError as error:
+        raise FileNotFoundError(
+            f'Modelo ausente: {path}. Execute python setup_models.py na raiz do repositório '
+            'com o mesmo Python do aplicativo, ou execute INSTALAR.bat.'
+        ) from error
+    if hashlib.sha256(model).hexdigest() != expected:
         raise ValueError(f'Modelo inválido: {path.name}. Remova esse arquivo e execute INSTALAR.bat novamente.')
 
 def prepare(folder: Path) -> None:
